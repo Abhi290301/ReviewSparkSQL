@@ -148,7 +148,7 @@ object NEWSQL {
 
       }
 
-      //@nd Example of writing parquet file
+      //2nd Example of writing parquet file
 
       newCDF.write.partitionBy("Department").parquet("C:\\tmp\\output\\Data1.parquet")
       newCDF.createOrReplaceTempView("Table")
