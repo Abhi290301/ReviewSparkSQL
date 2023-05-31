@@ -1,3 +1,4 @@
+package com.NEWSQL.NEWSQL
 import org.apache.spark._
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
@@ -66,6 +67,9 @@ object NEWSQL {
 
       newCDF.printSchema()
       newCDF.show(false)
+//      newCDF.write.mode("overwrite").parquet("C:\\tmp\\myDataCSV")
+      spark.read.parquet("C:\\tmp\\myDataCSV").printSchema()
+     spark.read.option("inferSchema","true").parquet("C:\\tmp\\myDataCSV").printSchema()
 
       //Using Distinct
       //Counting Data Entries before the distinct method
@@ -149,6 +153,7 @@ object NEWSQL {
       }
 
       //2nd Example of writing parquet file
+
 
       newCDF.write.partitionBy("Department").parquet("C:\\tmp\\output\\Data1.parquet")
       newCDF.createOrReplaceTempView("Table")
