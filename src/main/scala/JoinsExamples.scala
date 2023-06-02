@@ -38,22 +38,24 @@ object JoinsExamples {
     )
    val empdf = spark.createDataFrame(spark.sparkContext.parallelize(data),columns)
     empdf.show(false)
-    val data2 =Seq(("ID","Team","EMP Name"),("10","AWS","Shanky"),("20","Azure","Sai"),("30","DataOps","Abhishek"),("40","CloudOps","Shubham"))
+    val data2 =Seq(("10","AWS","Shanky"),("20","Azure","Sai"),("30","DataOps","Abhishek"),("40","CloudOps","Shubham"))
     val rdd = spark.sparkContext.parallelize(data2)
       val column2 = Seq("DeptID","DepartmentName","Name")
     import spark.implicits._
     val defDF = rdd.toDF(column2:_*)
-      defDF.show(false)
-val innerJoin = empdf.join(defDF,empdf("Dept_ID") === defDF("DeptID"),"inner")
+    defDF.show(false)
+    val innerJoin = empdf.join(defDF,empdf("Dept_ID") === defDF("DeptID"),"inner")
     innerJoin.show(false)
 
     val outerJoin = empdf.join(defDF, empdf("Dept_ID") === defDF("DeptID"), "outer")
     outerJoin.show(false)
+
     empdf.createOrReplaceTempView("Emp")
     defDF.createOrReplaceTempView("Dept")
+
     spark.sql("Select * from Emp e,Dept d where e.Dept_ID = d.DeptID").show(false)
     spark.sql (" select * from EMP e INNER JOIN DEPT d ON e.Dept_ID == d.DeptID" ).show ( false )
-//    spark.sql (" select * from EMP e OUTER JOIN DEPT d ON e.Dept_ID == d.DeptID" ).show ( false )
+
 
  println(s"The size of the outerJoin is ${SizeEstimator.estimate(outerJoin)/1000000} mb")
 

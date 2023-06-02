@@ -15,5 +15,13 @@ object BatchProcessing {
     df.printSchema ()
     df.show ( 1000, truncate = false )
     rdd.printSchema ()
+    val listRdd = spark.sparkContext.parallelize(List(1, 2, 3, 4, 5, 3, 2))
+
+    def param0 = (accu: Int, v: Int) => accu + v
+
+    def param1 = (accu1: Int, accu2: Int) => accu1 + accu2
+
+    println("output 1 : " + listRdd.aggregate(2)(param0, param1))
+
   }
 }

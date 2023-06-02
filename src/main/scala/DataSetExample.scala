@@ -1,7 +1,7 @@
 import org.apache.spark.sql.SparkSession
 
 // Define a case class for the data structure
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int,marks:Int)
 
 object DataSetExample {
   def main(args: Array[String]): Unit = {
@@ -13,15 +13,19 @@ object DataSetExample {
     try {
       // Create an RDD from a sequence of data
       val rdd = spark.sparkContext.parallelize(Seq(
-        Person("John", 30),
-        Person("Alice", 25),
-        Person("Bob", 35)
+        Person("John", 30,300),
+        Person("Alice", 25,300),
+        Person("Bob", 35,200)
       ))
 
       // Convert RDD to Dataset using toDS() method
       import spark.implicits._
-      val dataset = rdd.toDS()
+      val dataset = rdd.toDS
       dataset.show(false)
+      val df1 = dataset.toDF()
+      val rddcreate = df1.rdd
+      rddcreate.foreach(println)
+
       // Perform operations on the Dataset
       dataset.createOrReplaceTempView("Table")
       val filteredDataset = dataset.filter(_.age > 30)

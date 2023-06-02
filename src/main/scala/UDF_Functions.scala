@@ -19,12 +19,10 @@ object UDF_Functions extends App{
   )
   val df = data.toDF(columns:_*)
   df.show(false)
-
   val convertCase =  (str:String) => {
     val arr = str.split(" ")
     arr.map(f=>  f.substring(0,1).toUpperCase + f.substring(1,f.length)).mkString(" ")
   }
-
   //Using with DataFrame
   val convertUDF = udf(convertCase)
   df.select(col("Seqno"),

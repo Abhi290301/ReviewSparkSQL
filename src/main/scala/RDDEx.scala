@@ -79,12 +79,13 @@ object RDDEx {
     groupby1.count ().show ( false )
 
     //Collect As List
-    val coldata = shuffleDF.collectAsList ()
-
-
+    val coldata = shuffleDF.collectAsList ().stream()
+    println(coldata)
+    coldata.forEach(println)
     while (true) {
       var i = 600000
       Thread.sleep ( i )
+     i += i+1
     }
   }
 

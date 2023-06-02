@@ -1,8 +1,8 @@
-package com.NEWSQL.NEWSQL
 import org.apache.spark._
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.util.SizeEstimator
 
 object NEWSQL {
@@ -16,22 +16,30 @@ object NEWSQL {
     sc.stop()
 
     try {
+
+      //Creating Entry Point Spark Session
       val spark = SparkSession.builder()
         .appName("Testing")
         .master("local")
         .getOrCreate()
+      //Setting Log Level
       spark.sparkContext.setLogLevel("OFF")
+
+      //Creating a dataframe
       val data = Seq((1, "Abhishek"), (2, "Akash"))
       import spark.implicits._
       val rdd = spark.sparkContext.parallelize(data)
       val columns = Seq("ID", "User")
       val rddDF = rdd.toDF(columns: _*)
       val cdf = spark.createDataFrame(rdd).toDF(columns: _*)
-      rddDF.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+
+      //Setting Persistence Level
+      rddDF.persist(StorageLevel.MEMORY_AND_DISK)
       rddDF.printSchema()
       cdf.printSchema()
       cdf.show()
-      println("Storage level is " + rddDF.persist())
+
+      //Creating a New Table with some complex schema
       val tableData = Seq(
         Row(120, "Abhishek Chandel", "abhishekchandel@xenonstack.com", "Azure", "DataOps", 100000, 20000, "M", List("Scala,Spark,Java"), "HP", "IN"),
         Row(121, "Shashank Sharma", "shashank@xenonstack.com", "AWS", "CloudOps", 150000, 15000, "M", List("Go,React,Python"), "HP", "IN"),
@@ -48,28 +56,28 @@ object NEWSQL {
 
       val fields = new StructType(
         Array(
-          StructField("EID", IntegerType, false),
-          StructField("E-Name", StringType, false),
-          StructField("E-email", StringType, true),
-          StructField("Department", StringType, false),
-          StructField("Platform", StringType, false),
-          StructField("Salary", IntegerType, false),
-          StructField("Bonus", IntegerType, false),
-          StructField("Gender", StringType, true),
-          StructField("Languages", ArrayType(StringType), true),
-          StructField("States", StringType, true),
-          StructField("Country", StringType, true)
+          StructField("EID", IntegerType, nullable = false),
+          StructField("E-Name", StringType, nullable = false),
+          StructField("E-email", StringType, nullable = true),
+          StructField("Department", StringType, nullable = false),
+          StructField("Platform", StringType, nullable = false),
+          StructField("Salary", IntegerType, nullable = false),
+          StructField("Bonus", IntegerType, nullable = false),
+          StructField("Gender", StringType, nullable = true),
+          StructField("Languages", ArrayType(StringType), nullable = true),
+          StructField("States", StringType, nullable = true),
+          StructField("Country", StringType, nullable = true)
         )
       )
+      val rdd1 = spark.sparkContext.parallelize(tableData)
 
-      val newCDF = spark.createDataFrame(
-        spark.sparkContext.parallelize(tableData), fields)
+      val newCDF = spark.createDataFrame(rdd1, fields)
 
       newCDF.printSchema()
       newCDF.show(false)
-//      newCDF.write.mode("overwrite").parquet("C:\\tmp\\myDataCSV")
+      newCDF.write.mode("overwrite").parquet("C:\\tmp\\myDataCSV")
       spark.read.parquet("C:\\tmp\\myDataCSV").printSchema()
-     spark.read.option("inferSchema","true").parquet("C:\\tmp\\myDataCSV").printSchema()
+      spark.read.option("inferSchema", "true").parquet("C:\\tmp\\myDataCSV").printSchema()
 
       //Using Distinct
       //Counting Data Entries before the distinct method
@@ -85,18 +93,6 @@ object NEWSQL {
       distinctValue.where(distinctValue("Department") === "AWS").printSchema()
       distinctValue.where(distinctValue("Department") === "AWS").show(false)
       distinctValue.where(distinctValue("Gender") === "T" && distinctValue("E-Name") === "Ritik").show(false)
-
-
-      //BroadCast Variables
-      val states = Map("HP" -> "Himachal Pradesh", "PUN" -> "Punjab", "HR" -> "Haryana", "UK" -> "Utrakhand", "TN" -> "TamilNadu", "JK" -> "Jammu and Kashmir")
-      val country = Map("IN" -> "India")
-
-      val broadcastStates = spark.sparkContext.broadcast(states)
-      val broadcastCountry = spark.sparkContext.broadcast(country)
-      val states1 = newCDF.map(row =>
-        row.getString(8))
-      val country1 = newCDF.map(row =>
-        row.getString(9))
 
 
       //Estimating the size of the DataFrame
@@ -125,18 +121,18 @@ object NEWSQL {
 
       //Writing a parquet file
       try {
-           val data = Seq(("James ", "A", "Smith", "36636", "M", 3000),
-                 ("Michael ", "Rose", "A", "40288", "M", 4000),
-                 ("Robert ", "A", "Williams", "42114", "M", 4000),
-                 ("Maria ", "Anne", "Jones", "39192", "F", 4000),
-                 ("Jen", "Mary", "Brown", "15546", "F", 1000))
+        val data = Seq(("James ", "A", "Smith", "36636", "M", 3000),
+          ("Michael ", "Rose", "A", "40288", "M", 4000),
+          ("Robert ", "A", "Williams", "42114", "M", 4000),
+          ("Maria ", "Anne", "Jones", "39192", "F", 4000),
+          ("Jen", "Mary", "Brown", "15546", "F", 1000))
 
-               val columns = Seq("firstname", "middle name", "lastname", "dob", "gender", "salary")
+        val columns = Seq("firstname", "middle name", "lastname", "dob", "gender", "salary")
 
-               val df = data.toDF(columns: _*)
-   //            df.write.parquet("C:\\output\\example.parquet")
-               df.write.partitionBy("gender","salary").parquet("C:\\tmp\\output\\parquet.parquet")
-               df.createOrReplaceTempView("DataTable")
+        val df = data.toDF(columns: _*)
+        df.write.mode(SaveMode.Ignore).parquet("C:\\output\\example.parquet")
+        df.write.mode(SaveMode.Ignore).partitionBy("gender", "salary").parquet("C:\\tmp\\output\\parquet.parquet")
+        df.createOrReplaceTempView("DataTable")
 
         val parquetRead = spark.read.option("inferSchema", "true").parquet("C:\\tmp\\output\\parquet.parquet")
         parquetRead.createOrReplaceTempView("ParquetTable")
@@ -154,17 +150,17 @@ object NEWSQL {
 
       //2nd Example of writing parquet file
 
-
-      newCDF.write.partitionBy("Department").parquet("C:\\tmp\\output\\Data1.parquet")
+      newCDF.write.mode(SaveMode.Ignore).partitionBy("Department").parquet("C:\\tmp\\output\\Data1.parquet")
       newCDF.createOrReplaceTempView("Table")
       val query1 = spark.sql("Select * from Table where Department = 'AWS'")
       query1.show(false)
+
       //With Columns
       val newCDF2 = newCDF.withColumn("CODE", lit("XS/IN"))
       newCDF2.show(false)
+
       //With Columns Renamed
       newCDF2.withColumnRenamed("CODE", "COMPANY CODE").withColumnRenamed("SALARY", "InHand Credit").show(false)
-
 
       //Reading JSON file
       val readJSON = spark.read.option("multiline", "true").json("C:\\tmp\\multiline-zipcode.json")
@@ -182,7 +178,6 @@ object NEWSQL {
       read.show(false)
 
       //Reading CSV files
-
       val readCSV = spark.read.option("multiline", "true").option("header", "true").csv("C:\\tmp\\stream.csv")
       readCSV.printSchema()
       readCSV.show(false)
