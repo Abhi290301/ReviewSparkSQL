@@ -14,7 +14,7 @@ object BroadCastJoins {
 //    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", 104857600)
     sc.setLogLevel("OFF")
     println("spark.sparkContext.version")
-    val rdd = spark.read.option("header", "true").option("delimiter", "true").option("inferSchema", "true")
+    val rdd = spark.read.option("header", "true").option("delimiter", "true").option("inferSchema", "true").option("samplingRatio",12)
       .parquet("C:\\tmp\\output\\Joins.parquet")
     val df = rdd.toDF()
     df.printSchema()
@@ -40,7 +40,6 @@ object BroadCastJoins {
      (df),
       df("State") === smallerDF("CODE")
     ).explain(false)
-
 
     while (true) {
       Thread.sleep(6000)
