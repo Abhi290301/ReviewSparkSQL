@@ -10,11 +10,12 @@ object BroadCastJoins {
       .appName("Broad Cast Joins")
       .getOrCreate()
     val sc = spark.sparkContext
-
-//    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", 104857600)
+    val size =104857600
+    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", size)
+    println("Size set to " +size/(1024*1024) + "MB")
     sc.setLogLevel("OFF")
     println("spark.sparkContext.version")
-    val rdd = spark.read.option("header", "true").option("delimiter", "true").option("inferSchema", "true").option("samplingRatio",12)
+    val rdd = spark.read.option("header", "true").option("delimiter", "true").option("inferSchema", "true").option("samplingRatio", 12)
       .parquet("C:\\tmp\\output\\Joins.parquet")
     val df = rdd.toDF()
     df.printSchema()
@@ -37,7 +38,7 @@ object BroadCastJoins {
     ).explain(false)
 
     smallerDF.join(
-     (df),
+      (df),
       df("State") === smallerDF("CODE")
     ).explain(false)
 
@@ -46,4 +47,37 @@ object BroadCastJoins {
     }
   }
 
+}
+
+object BroadcastJoinExample {
+  def main(args: Array[String]): Unit = {
+    // Create a SparkSession
+    val spark = SparkSession.builder()
+      .appName("BroadcastJoinExample")
+      .getOrCreate()
+
+    // Enable broadcasting for small tables
+    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "52428800") // 50 MB
+
+    // Read the large table
+    val largeTableDF = spark.read
+      .format("csv")
+      .option("header", "true")
+      .load("C:\\tmp\\projects_smaller.csv")
+
+    // Read the small table
+    val smallTableDF = spark.read
+      .format("csv")
+      .option("header", "true")
+      .load("C:\\tmp\\stream.csv")
+
+    // Perform the broadcast join
+    val joinedDF = largeTableDF.join(broadcast(smallTableDF), "joinColumn")
+
+    // Do further processing or output the result
+    joinedDF.show()
+
+    // Stop the SparkSession
+    spark.stop()
+  }
 }

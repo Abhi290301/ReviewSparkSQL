@@ -1,8 +1,8 @@
 package Review1
 
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Row, SaveMode, SparkSession}
-import org.apache.spark.util.SizeEstimator
+import org.apache.spark.sql._
+import org.apache.spark.util._
 
 object JoinsExamples {
   def main(args: Array[String]): Unit = {
@@ -25,6 +25,7 @@ object JoinsExamples {
       Row(129, "Shubham", "shubham@xenonstack.com", 20, "DataOps", 65000, 16000, "M", List("Scala,Spark,Java"), "HP", "IN"),
       Row(130, "Ritik", "ritik@xenonstack.com", 30, "DataOps", 65000, 15000, "T", List(""), "HR", "IN")
     )
+
     val columns = new StructType(Array(
       StructField("EID", IntegerType, nullable = true),
       StructField("Name", StringType, nullable = true),
