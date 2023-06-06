@@ -8,25 +8,30 @@ libraryDependencies ++= Seq(
   //Spark Dependencies
   "org.apache.spark" %% "spark-core" % "3.3.2"
   , "org.apache.spark" %% "spark-sql" % "3.3.2",
+  "org.apache.spark" %% "spark-streaming" % "3.3.2",
+  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.3.2",
+  "org.apache.avro" % "avro" % "1.11.0",
+  "org.apache.kafka" % "kafka-clients" % "3.4.0",
+  "com.google.protobuf" % "protobuf-java" % "3.22.2",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.15.1",
 
   //Apache Hadoop Dependencies
   "org.apache.hadoop" % "hadoop-client" % "3.3.2",
   "org.apache.hadoop" % "hadoop-hdfs-test" % "0.22.0",
   "org.apache.spark" %% "spark-hive" % "3.3.2" % "provided",
 
-  //Kafka Dependencies
-  "org.apache.kafka" % "kafka-clients" % "3.4.0",
+)
+libraryDependencies ++= Seq(
   "org.apache.kafka" %% "kafka" % "3.4.0",
-  "org.apache.spark" %% "spark-sql-kafka-0-10" % "3.4.0"
+  "org.apache.kafka" % "kafka-clients" % "3.4.0",
+  "org.apache.kafka" % "kafka_2.13" % "3.4.0",
+  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.3.2"
 )
 
 // JDK Setup
 javaHome := Some(file("C:\\jdk-11.0.0.1\\bin"))
 javacOptions ++= Seq("-source", "11", "-target", "11")
 
-//Scala Testing Libraries
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % Test
-libraryDependencies += "org.typelevel" %% "cats-core" % "2.9.0"
 
 lazy val root = (project in file("."))
   .settings(

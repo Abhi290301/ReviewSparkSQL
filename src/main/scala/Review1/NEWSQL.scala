@@ -91,11 +91,9 @@ object NEWSQL {
       println("Total no. of values After Distinct: " + distinctValue.count())
 
       //Where Clause
-
       distinctValue.where(distinctValue("Department") === "AWS").printSchema()
       distinctValue.where(distinctValue("Department") === "AWS").show(false)
       distinctValue.where(distinctValue("Gender") === "T" && distinctValue("E-Name") === "Ritik").show(false)
-
 
       //Estimating the size of the DataFrame
       val estimating = SizeEstimator.estimate(newCDF)
@@ -107,19 +105,14 @@ object NEWSQL {
       //GroupBy
       newCDF.groupBy("Department").sum("salary").show(false)
       newCDF.groupBy("Department").min("salary").show(false)
-
       newCDF.groupBy("Department", "States").sum("salary").show(false)
-
       newCDF.groupBy("Department", "States")
         .agg(
           sum("Salary").as("Sum_Salary"),
           min("Salary").as("Min. Salary"),
           avg("Salary").as("Avg_Salary"),
           avg("Bonus").as("Avg_Bonus")
-
         ).where(col("Avg_Bonus") >= 3000).show(false)
-
-
 
       //Writing a parquet file
       try {
@@ -128,7 +121,7 @@ object NEWSQL {
           ("Robert ", "A", "Williams", "42114", "M", 4000),
           ("Maria ", "Anne", "Jones", "39192", "F", 4000),
           ("Jen", "Mary", "Brown", "15546", "F", 1000))
-
+        
         val columns = Seq("firstname", "middle name", "lastname", "dob", "gender", "salary")
 
         val df = data.toDF(columns: _*)
